@@ -66,7 +66,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	isValid := base64Captcha.VerifyCaptcha(id, captcha)
 
 	body := make(map[string]bool)
-	body["isValid"] = isValid
+	body["valid"] = isValid
 
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	err := json.NewEncoder(w).Encode(body)
