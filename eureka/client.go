@@ -1,16 +1,17 @@
 package eureka
 
 import (
-	"fmt"
-	"strings"
-	"os"
-	"io/ioutil"
-	"time"
-	"log"
 	"captcha/config"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
-	"github.com/satori/go.uuid"
 	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type Instance struct {
@@ -67,7 +68,7 @@ func Register(env *config.Configuration) {
 		return
 	}
 	if rawTpl, err = ioutil.ReadFile(dir + "/conf/regtpl.json"); err != nil {
-		log.Printf("Failed to read %s/regtpl.json file \r\n", dir)
+		log.Printf("Failed to read %s/conf/regtpl.json file \r\n", dir)
 		log.Println(err)
 		return
 	}
@@ -83,7 +84,7 @@ func register(instance Instance) {
 		if DoHttpRequest(instance.RegisterAction) {
 			instance.Registered = true
 			go heartbeat(instance)
-			// log.Printf("Registered: %s \r\n", instance.BaseURL)
+			log.Printf("Registered: %s \r\n", instance.BaseURL)
 			break
 		} else {
 			time.Sleep(time.Second * 5)

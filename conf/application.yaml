@@ -1,5 +1,5 @@
 application:
-  name: orbit-captcha
+  name: captcha
   server:
     port: 7006
 eureka: http://discovery.orbit.com:7000/eureka

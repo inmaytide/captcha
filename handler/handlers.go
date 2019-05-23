@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/mojocn/base64Captcha"
-	"net/http"
-	"log"
 	"encoding/json"
+	"log"
+	"net/http"
+
 	"github.com/gorilla/mux"
+	"github.com/mojocn/base64Captcha"
 )
 
 const HEADER_NAME_CPATCHA_ID = "x-captcha-name"
@@ -53,9 +54,15 @@ func GenerateAndWriteToHttpResponseWriter(w http.ResponseWriter, r *http.Request
 }
 
 func Validate(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r);
+	vars := mux.Vars(r)
 	captcha := vars["captcha"]
 	id := r.Header.Get(HEADER_NAME_CPATCHA_ID)
+
+	if id == "" {
+		WriteBadRequest(w, r.RequestURI, "Captcha name cannot be emtpy")
+		return
+	}
+
 	isValid := base64Captcha.VerifyCaptcha(id, captcha)
 
 	body := make(map[string]bool)

@@ -1,7 +1,5 @@
 package cache
 
-import "log"
-
 const CACHE_EXPIRE = 15 * 60
 
 type CaptchaStore struct {
@@ -20,8 +18,6 @@ func (s *CaptchaStore) Set(id string, value string) {
 }
 
 func (s *CaptchaStore) Get(id string, clear bool) string {
-	log.Println(id);
-
 	value, err := s.client.Get(id)
 	if err != nil {
 		panic(err)
@@ -36,7 +32,9 @@ func (s *CaptchaStore) Get(id string, clear bool) string {
 
 	result := string(value)
 
-	log.Println(result)
+	if result == "" {
+		return ""
+	}
 
-	return result[1:len(result)-1];
+	return result[1 : len(result)-1]
 }
