@@ -2,7 +2,11 @@ application:
   name: captcha
   server:
     port: 7006
-eureka: http://discovery.orbit.com:7000/eureka
+eureka:
+  clients:
+    - service-url: https://registry.orbit.com:7000/eureka
+      http-basic-auth-username: admin
+      http-basic-auth-password: public
 redis:
   addr: redis-server.orbit.com:6379
 captcha:

@@ -27,26 +27,28 @@ var rawTpl []byte
 
 func processTpl(env *config.Configuration, id string) string {
 	tpl := string(rawTpl)
-	tpl = strings.Replace(tpl, "${ip.address}", getLocalIP(), -1)
+	tpl = strings.Replace(tpl, "${ip.address}", "192.168.30.102", -1)
 	tpl = strings.Replace(tpl, "${port}", fmt.Sprintf("%d", env.Application.Server.Port), -1)
 	tpl = strings.Replace(tpl, "${instanceID}", id, -1)
 	tpl = strings.Replace(tpl, "${application.name}", env.Application.Name, -1)
 	return tpl
 }
 
-func makeInstance(env *config.Configuration, eureka string) Instance {
+func makeInstance(env *config.Configuration, client config.EurekaClient) Instance {
 	id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
-	baseURL := fmt.Sprintf("%s/apps/%s", eureka, env.Application.Name)
+	baseURL := fmt.Sprintf("%s/apps/%s", client.ServiceUrl, env.Application.Name)
 	tpl := processTpl(env, id)
 	return Instance{
 		ID:        id,
 		BaseURL:   baseURL,
 		StatusURL: fmt.Sprintf("%s/%s:%s:%s", baseURL, getLocalIP(), env.Application.Name, id),
 		RegisterAction: HttpAction{
-			URL:         baseURL,
-			Method:      http.MethodPost,
-			ContentType: "application/json",
-			Body:        tpl,
+			URL:               baseURL,
+			Method:            http.MethodPost,
+			ContentType:       "application/json",
+			Body:              tpl,
+			HttpBasicUsername: client.Username,
+			HttpBasicPassword: client.Password,
 		},
 		Registered: false,
 	}
@@ -54,13 +56,12 @@ func makeInstance(env *config.Configuration, eureka string) Instance {
 
 // Register ...
 func Register(env *config.Configuration) {
-	if env.Eureka == "" {
-		log.Println("Cannot found available eureka server...")
+	if len(env.Eureka.Clients) == 0 {
+		log.Println("Couldn't found available eureka server...")
 		return
 	}
 
-	servers := strings.Split(env.Eureka, ",")
-	instances = make([]Instance, len(servers))
+	instances = make([]Instance, len(env.Eureka.Clients))
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Println("Failed to get program root directory")
@@ -73,7 +74,7 @@ func Register(env *config.Configuration) {
 		return
 	}
 
-	for i, n := range servers {
+	for i, n := range env.Eureka.Clients {
 		instances[i] = makeInstance(env, n)
 		go register(instances[i])
 	}
@@ -95,8 +96,10 @@ func register(instance Instance) {
 func heartbeat(instance Instance) {
 	for {
 		heartbeatAction := HttpAction{
-			URL:    instance.StatusURL,
-			Method: "PUT",
+			URL:               instance.StatusURL,
+			Method:            "PUT",
+			HttpBasicPassword: instance.RegisterAction.HttpBasicPassword,
+			HttpBasicUsername: instance.RegisterAction.HttpBasicUsername,
 		}
 		if DoHttpRequest(heartbeatAction) {
 			time.Sleep(time.Second * 30)

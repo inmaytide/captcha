@@ -1,10 +1,10 @@
 package cache
 
 import (
+	"captcha/config"
+	"encoding/json"
 	"github.com/mediocregopher/radix/v3"
 	"log"
-	"encoding/json"
-	"captcha/config"
 )
 
 type RedisClient struct {

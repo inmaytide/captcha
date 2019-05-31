@@ -1,20 +1,27 @@
 package config
 
 import (
-	"os"
-	"log"
-	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
+type EurekaClient struct {
+	ServiceUrl string `yaml:"service-url"`
+	Username   string `yaml:"http-basic-auth-username"`
+	Password   string `yaml:"http-basic-auth-password"`
+}
 type Configuration struct {
 	Application struct {
-		Name string `yaml:"name"`
+		Name   string `yaml:"name"`
 		Server struct {
 			Port int `yaml:"port"`
 		}
 	}
-	Eureka string `yaml:"eureka"`
+	Eureka struct {
+		Clients []EurekaClient
+	}
 	Redis struct {
 		Addr string `yaml:"addr"`
 	}

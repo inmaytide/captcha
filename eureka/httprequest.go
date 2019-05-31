@@ -2,20 +2,23 @@ package eureka
 
 import (
 	"crypto/tls"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 )
 
 type HttpAction struct {
-	Method      string `yaml:"method"`
-	URL         string `yaml:"url"`
-	Body        string `yaml:"body"`
-	Template    string `yaml:"template"`
-	Accept      string `yaml:"accept"`
-	ContentType string `yaml:"contentType"`
-	Title       string `yaml:"title"`
-	StoreCookie string `yaml:"storeCookie"`
+	Method            string `yaml:"method"`
+	URL               string `yaml:"url"`
+	Body              string `yaml:"body"`
+	Template          string `yaml:"template"`
+	Accept            string `yaml:"accept"`
+	ContentType       string `yaml:"contentType"`
+	Title             string `yaml:"title"`
+	StoreCookie       string `yaml:"storeCookie"`
+	HttpBasicUsername string
+	HttpBasicPassword string
 }
 
 func DoHttpRequest(action HttpAction) bool {
@@ -29,6 +32,16 @@ func DoHttpRequest(action HttpAction) bool {
 
 	if err != nil {
 		log.Printf("Http request failed: %s", err)
+		return false
+	}
+
+	if response.StatusCode < 200 || response.StatusCode > 300 {
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Printf("Http request failed: %d, invalid response body", response.StatusCode)
+			return false
+		}
+		log.Printf("Http request failed: %d, %s", response.StatusCode, string(body))
 		return false
 	}
 
@@ -52,6 +65,10 @@ func buildHttpRequest(action HttpAction) *http.Request {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if action.HttpBasicUsername != "" {
+		request.SetBasicAuth(action.HttpBasicUsername, action.HttpBasicPassword)
 	}
 
 	request.Header.Add("Accept", action.Accept)
