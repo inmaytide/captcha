@@ -27,7 +27,7 @@ var rawTpl []byte
 
 func processTpl(env *config.Configuration, id string) string {
 	tpl := string(rawTpl)
-	tpl = strings.Replace(tpl, "${ip.address}", "192.168.30.102", -1)
+	tpl = strings.Replace(tpl, "${ip.address}", getLocalIP(), -1)
 	tpl = strings.Replace(tpl, "${port}", fmt.Sprintf("%d", env.Application.Server.Port), -1)
 	tpl = strings.Replace(tpl, "${instanceID}", id, -1)
 	tpl = strings.Replace(tpl, "${application.name}", env.Application.Name, -1)
