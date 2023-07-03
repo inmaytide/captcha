@@ -9,5 +9,5 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	go.uber.org/dig v1.7.0
 	golang.org/x/tools v0.0.0-20190521203540-521d6ed310dd // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.4.0
 )
